@@ -1,0 +1,1 @@
+# spinal-env-viewer-plugin-apps-generator
