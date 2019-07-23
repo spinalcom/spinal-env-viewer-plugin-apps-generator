@@ -1,1 +1,1 @@
-# spinal-env-viewer-plugin-apps-generator
+# spinal-env-viewer-plugin-cde
