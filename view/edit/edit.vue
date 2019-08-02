@@ -36,7 +36,7 @@ with this file. If not, see
           <v-container class="deleteHeightPadding"
                        grid-list-md>
             <v-layout wrap>
-              <v-flex xs12>
+              <v-flex xs6>
                 <v-combobox v-model="selectedusers"
                             :items="userLst"
                             :search-input="search"
@@ -58,12 +58,13 @@ with this file. If not, see
                   </template>
                 </v-combobox>
               </v-flex>
-              <v-flex xs12>
+              <v-flex xs6>
                 <v-combobox v-model="selectedRole"
                             :items="roleLst"
                             :search-input="searchRole"
                             label="Add some role"
                             hide-selected
+                            :menu-props="{maxHeight:'100'}"
                             multiple
                             persistent-hint
                             small-chips
@@ -155,6 +156,8 @@ export default {
   name: "index",
   data() {
     return {
+      selectedNode: undefined,
+      element: undefined,
       selectedContext: undefined,
       showDialog: true,
       selectedusers: [],
@@ -178,9 +181,6 @@ export default {
   components: {},
   methods: {
     opened(option) {
-      this.selectedContext = option.selectedNode;
-      this.title = "";
-      this.description = "";
       this.image = {
         imageName: "",
         imageFile: "",
@@ -189,18 +189,49 @@ export default {
         height: "",
         width: ""
       };
-      usersService
-        .getUsers()
-        .then(userLst => {
-          this.userLst = userLst;
-        })
-        .catch(console.error);
-      usersService
-        .getRole()
-        .then(roleLst => {
-          this.roleLst = roleLst;
-        })
-        .catch(console.error);
+      //get all avalible context
+      usersService.getAvailableContext();
+      this.selectedNode = option.selectedNode;
+      this.selectedNode.element.load().then(info => {
+        this.element = info;
+        this.selectedContext = info.context;
+        this.description = info.description;
+        this.title = info.title;
+        usersService.getFileByElement(info.image).then(imageLoaded => {
+          this.image.imageUrl = imageLoaded.imageUrl;
+        });
+
+        usersService
+          .getUsers()
+          .then(userLst => {
+            this.userLst = userLst;
+            this.selectedusers = [];
+            if (info.userLst) {
+              for (let i = 0; i < info.userLst.length; i++) {
+                const element = info.userLst[i];
+                this.selectedusers.push(element.name.get());
+              }
+            }
+          })
+          .catch(console.error);
+        usersService
+          .getRole()
+          .then(roleLst => {
+            this.roleLst = roleLst;
+            this.selectedRole = [];
+            if (info.role) {
+              for (let i = 0; i < info.role.length; i++) {
+                const element = info.role[i];
+                this.selectedRole.push(element.name.get());
+              }
+            }
+          })
+          .catch(console.error);
+      });
+      // this.selectedContext = option.selectedNode;
+      // this.title = "";
+      // this.description = "";
+
       this.showDialog = true;
     },
     removed(option, viewer) {},
@@ -224,15 +255,19 @@ export default {
         fr.addEventListener("load", () => {
           let img = new Image();
           img.onload = () => {
-            this.image.width = img.width;
-            this.image.height = img.height;
-            if (
-              this.image.width > MAX_WIDTH ||
-              this.image.height > MAX_HEIGHT
-            ) {
-              imageSizeBool = true;
-            }
-            // img.src = fr.result;
+            // this.image.width = img.width;
+            // this.image.height = img.height;
+            // console.log("taille de l'image importé");
+            // console.log(this.image.width);
+            // console.log(this.image.height);
+
+            // if (
+            //   this.image.width > MAX_WIDTH ||
+            //   this.image.height > MAX_HEIGHT
+            // ) {
+            //   imageSizeBool = true;
+            // }
+            img.src = fr.result;
             // this is an image file that can be sent to server...
           };
           this.image.imageUrl = fr.result;
@@ -253,21 +288,15 @@ export default {
         selectedUser: this.selectedusers,
         selectedRole: this.selectedRole
       };
-      if (
-        info.selectedContext &&
-        info.title &&
-        info.title != "" &&
-        info.description &&
-        info.description != "" &&
-        info.image &&
-        info.selectedUser.length != 0 &&
-        info.selectedRole.length != 0
-      ) {
-        console.log("application is ok");
-        usersService.saveApps(info);
+
+      if (info.image.imageFile == "" || info.image.imageName == "") {
+        //image not change
+        usersService.editApps(this.element, info, false);
         this.showDialog = false;
       } else {
-        console.log("application not ok");
+        //image change
+        usersService.editApps(this.element, info, true);
+        this.showDialog = false;
       }
     }
   },
