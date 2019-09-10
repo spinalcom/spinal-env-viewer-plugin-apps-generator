@@ -21,26 +21,11 @@ const circularMenuHookName = 'circularMenu';
 const SideBarHookName = 'GraphManagerSideBar';
 const appName = "appsGenerator"
 const appNameEdit = "appsGeneratorEdit"
-import { isShownType, nodeTypeApp } from '../service/users'
+import { isShownType, nodeTypeApp } from '../service/appsService'
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                Documentation Panel                                             //
+//                                apps Panel                                                      //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-// export const appsGenerator = SpinalForgeExtention.createExtention({
-//   name: appName,
-//   vueMountComponent: Vue.extend(index),
-//   // toolbar is optional
-
-//   panel: {
-//     title: appName,
-//     classname: 'spinal-pannel',
-//     closeBehaviour: 'remove', // if something else panel is deleted
-//   },
-
-//   onload: () => {},
-//   onUnLoad: () => {},
-// });
 
 export class appsGeneratorButton extends SpinalContextApp {
   constructor() {
@@ -77,7 +62,7 @@ export class appsGeneratorEditButton extends SpinalContextApp {
   }
 
   isShown(option) {
-    if (nodeTypeApp.indexOf(option.selectedNode.type.get()) > -1) {
+    if (option.selectedNode.type.get() == nodeTypeApp) {
       return Promise.resolve(true)
     } else {
       return Promise.resolve(-1)
@@ -114,43 +99,3 @@ const dialogLst = [{
 for (let i = 0; i < dialogLst.length; i++) {
   SpinalMountExtention.mount(dialogLst[i]);
 }
-
-
-
-
-
-// /////////////////////////:
-// class SpinalContextRename extends SpinalContextApp {
-//   constructor() {
-//     super("Rename button", "rename", {
-//       icon: "text_format",
-//       icon_type: "in",
-//       backgroundColor: "#FF0000",
-//       fontColor: "#FFFFFF"
-//     });
-//   }
-
-//   isShown(option) {
-//     // const type = option.selectedNode.type.get();
-//     // if (type === "SpinalService" || type === "scene" || type ===
-//     //   "SpinalContext" || type === "BimFile")
-//     //   return (Promise.resolve(-1))
-//     return (Promise.resolve(true));
-//   }
-
-//   action(option) {
-//     spinalPanelManagerService.openPanel("standardButtonRename", option);
-//   }
-// }
-// spinalContextMenuService.registerApp("GraphManagerSideBar",
-//   new SpinalContextRename(), [3]);
-
-// const dialogsRename = [{
-//   name: "standardButtonRename",
-//   vueMountComponent: vue.extend(dialogRenameComponent),
-//   parentContainer: document.body
-// }];
-
-// for (let index = 0; index < dialogsRename.length; index++) {
-//   SpinalMountExtention.mount(dialogsRename[index]);
-// }

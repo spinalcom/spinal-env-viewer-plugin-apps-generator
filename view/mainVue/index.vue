@@ -37,9 +37,14 @@ with this file. If not, see
                        grid-list-md>
             <v-layout wrap>
               <v-flex xs12>
+                <v-select :items="sceneLst"
+                          v-model="selectedScene"
+                          label="Select your scene"></v-select>
+              </v-flex>
+              <v-flex xs6>
                 <v-combobox v-model="selectedusers"
                             :items="userLst"
-                            :search-input="search"
+                            :search-input="searchUser"
                             label="Add some user"
                             hide-selected
                             multiple
@@ -51,14 +56,15 @@ with this file. If not, see
                     <v-list-item>
                       <v-list-item-content>
                         <v-list-item-title>
-                          No results matching "<strong>{{ search }}</strong>".
+                          No results matching
+                          "<strong>{{ searchUser }}</strong>".
                         </v-list-item-title>
                       </v-list-item-content>
                     </v-list-item>
                   </template>
                 </v-combobox>
               </v-flex>
-              <v-flex xs12>
+              <v-flex xs6>
                 <v-combobox v-model="selectedRole"
                             :items="roleLst"
                             :search-input="searchRole"
@@ -150,21 +156,26 @@ with this file. If not, see
 </template>
 
 <script>
-import usersService from "../../service/users";
+import appsService from "../../service/appsService";
+import { constants } from "crypto";
 export default {
   name: "index",
   data() {
     return {
       selectedContext: undefined,
       showDialog: true,
+      userLst: null,
+      searchUser: null,
       selectedusers: [],
-      search: null,
+      roleLst: null,
       selectedRole: [],
       searchRole: null,
+      sceneLst: [],
+      selectedScene: null,
+      searchScene: null,
       title: "",
       description: "",
       imageSizeBool: false,
-      userLst: [],
       image: {
         imageName: "",
         imageFile: "",
@@ -189,13 +200,16 @@ export default {
         height: "",
         width: ""
       };
-      usersService
+      appsService.getScene().then(sceneLst => {
+        this.sceneLst = sceneLst;
+      });
+      appsService
         .getUsers()
         .then(userLst => {
           this.userLst = userLst;
         })
         .catch(console.error);
-      usersService
+      appsService
         .getRole()
         .then(roleLst => {
           this.roleLst = roleLst;
@@ -251,7 +265,8 @@ export default {
         description: this.description,
         image: this.image,
         selectedUser: this.selectedusers,
-        selectedRole: this.selectedRole
+        selectedRole: this.selectedRole,
+        selectedScene: this.selectedScene
       };
       if (
         info.selectedContext &&
@@ -261,23 +276,33 @@ export default {
         info.description != "" &&
         info.image &&
         info.selectedUser.length != 0 &&
-        info.selectedRole.length != 0
+        info.selectedRole.length != 0 &&
+        info.selectedScene != null
       ) {
-        console.log("application is ok");
-        usersService.saveApps(info);
+        appsService.saveApps(info);
         this.showDialog = false;
-      } else {
-        console.log("application not ok");
       }
     }
   },
   watch: {
     selectedusers(val) {
+      for (let i = 0; i < val.length; i++) {
+        const element = val[i];
+        if (!this.userLst.includes(element)) {
+          val.splice(i, 1);
+        }
+      }
       if (val.length > this.userLst.length) {
         this.$nextTick(() => this.selectedusers.pop());
       }
     },
     selectedRole(val) {
+      for (let i = 0; i < val.length; i++) {
+        const element = val[i];
+        if (!this.roleLst.includes(element)) {
+          val.splice(i, 1);
+        }
+      }
       if (val.length > this.roleLst.length) {
         this.$nextTick(() => this.selectedRole.pop());
       }

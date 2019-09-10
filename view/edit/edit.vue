@@ -36,6 +36,11 @@ with this file. If not, see
           <v-container class="deleteHeightPadding"
                        grid-list-md>
             <v-layout wrap>
+              <v-flex xs12>
+                <v-select :items="sceneLst"
+                          v-model="selectedScene"
+                          label="Select your scene"></v-select>
+              </v-flex>
               <v-flex xs6>
                 <v-combobox v-model="selectedusers"
                             :items="userLst"
@@ -151,7 +156,7 @@ with this file. If not, see
 </template>
 
 <script>
-import usersService from "../../service/users";
+import appsService from "../../service/appsService";
 export default {
   name: "index",
   data() {
@@ -168,6 +173,8 @@ export default {
       description: "",
       imageSizeBool: false,
       userLst: [],
+      sceneLst: [],
+      selectedScene: null,
       image: {
         imageName: "",
         imageFile: "",
@@ -190,18 +197,27 @@ export default {
         width: ""
       };
       //get all avalible context
-      usersService.getAvailableContext();
+      appsService.getAvailableContext();
       this.selectedNode = option.selectedNode;
       this.selectedNode.element.load().then(info => {
         this.element = info;
         this.selectedContext = info.context;
         this.description = info.description;
         this.title = info.title;
-        usersService.getFileByElement(info.image).then(imageLoaded => {
+
+        appsService.getFileByElement(info.image).then(imageLoaded => {
           this.image.imageUrl = imageLoaded.imageUrl;
         });
-
-        usersService
+        appsService.getScene().then(sceneLst => {
+          this.sceneLst = sceneLst;
+          for (let i = 0; i < sceneLst.length; i++) {
+            const element = sceneLst[i];
+            if (element.value == info.selectedScene.get()) {
+              this.selectedScene = element;
+            }
+          }
+        });
+        appsService
           .getUsers()
           .then(userLst => {
             this.userLst = userLst;
@@ -214,7 +230,7 @@ export default {
             }
           })
           .catch(console.error);
-        usersService
+        appsService
           .getRole()
           .then(roleLst => {
             this.roleLst = roleLst;
@@ -255,20 +271,7 @@ export default {
         fr.addEventListener("load", () => {
           let img = new Image();
           img.onload = () => {
-            // this.image.width = img.width;
-            // this.image.height = img.height;
-            // console.log("taille de l'image importé");
-            // console.log(this.image.width);
-            // console.log(this.image.height);
-
-            // if (
-            //   this.image.width > MAX_WIDTH ||
-            //   this.image.height > MAX_HEIGHT
-            // ) {
-            //   imageSizeBool = true;
-            // }
             img.src = fr.result;
-            // this is an image file that can be sent to server...
           };
           this.image.imageUrl = fr.result;
           this.image.imageFile = files[0];
@@ -291,22 +294,34 @@ export default {
 
       if (info.image.imageFile == "" || info.image.imageName == "") {
         //image not change
-        usersService.editApps(this.element, info, false);
+        appsService.editApps(this.element, info, false);
         this.showDialog = false;
       } else {
         //image change
-        usersService.editApps(this.element, info, true);
+        appsService.editApps(this.element, info, true);
         this.showDialog = false;
       }
     }
   },
   watch: {
     selectedusers(val) {
+      for (let i = 0; i < val.length; i++) {
+        const element = val[i];
+        if (!this.userLst.includes(element)) {
+          val.splice(i, 1);
+        }
+      }
       if (val.length > this.userLst.length) {
         this.$nextTick(() => this.selectedusers.pop());
       }
     },
     selectedRole(val) {
+      for (let i = 0; i < val.length; i++) {
+        const element = val[i];
+        if (!this.roleLst.includes(element)) {
+          val.splice(i, 1);
+        }
+      }
       if (val.length > this.roleLst.length) {
         this.$nextTick(() => this.selectedRole.pop());
       }
