@@ -10,7 +10,7 @@ import {
 import { SERVICE_TYPE } from 'spinal-service-ticket/dist/Constants'
 import { SCENE_RELATION_NAME, PART_RELATION_NAME, SCENE_RELATION_TYPE } from "spinal-env-viewer-plugin-scene/src/constants";
 
-const isShownType = [ROOMS_GROUP_CONTEXT, EQUIPMENTS_GROUP_CONTEXT, SERVICE_TYPE]
+const isShownType = [ROOMS_GROUP_CONTEXT, EQUIPMENTS_GROUP_CONTEXT, SERVICE_TYPE, "EquipmentGroupContext", "geographicContext"]
 const availableContextType = [SERVICE_TYPE, ROOMS_GROUP_CONTEXT, EQUIPMENTS_GROUP_CONTEXT]
 
 class AppsContextModel extends Model {
