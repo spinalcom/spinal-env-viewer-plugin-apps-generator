@@ -11,12 +11,8 @@ import { SERVICE_TYPE } from 'spinal-service-ticket/dist/Constants'
 import { SCENE_RELATION_NAME, PART_RELATION_NAME, SCENE_RELATION_TYPE } from "spinal-env-viewer-plugin-scene/src/constants";
 import taskService from 'spinal-env-viewer-task-service'
 
-<<<<<<< HEAD
 
 const isShownType = [ROOMS_GROUP_CONTEXT, EQUIPMENTS_GROUP_CONTEXT, SERVICE_TYPE, "EquipmentGroupContext", "geographicContext", ...taskService.VISITS.map(el => el.type)]
-=======
-const isShownType = [ROOMS_GROUP_CONTEXT, EQUIPMENTS_GROUP_CONTEXT, SERVICE_TYPE, "EquipmentGroupContext", "geographicContext"]
->>>>>>> 9e12ca29e0b94dbb2bb0eb13583f8413b7451eb6
 const availableContextType = [SERVICE_TYPE, ROOMS_GROUP_CONTEXT, EQUIPMENTS_GROUP_CONTEXT]
 
 class AppsContextModel extends Model {
